@@ -390,8 +390,14 @@ function MaterialUpload({ module, onModuleRefresh }) {
     }
 
     setUploadStatus("Datei wird hochgeladen …");
-    const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
-    const path = `${module.id}/${Date.now()}-${safeName}`;
+    const safeName = file.name
+      .normalize("NFD")
+      .replace(/[̀-ͯ]/g, "")
+      .replace(/[^a-zA-Z0-9._-]/g, "_")
+      .replace(/_+/g, "_")
+      .replace(/^\.+/, "")
+      .slice(0, 120);
+    const path = `${module.id}-${Date.now()}-${safeName || "material"}`;
 
     const { error: uploadError } = await supabase.storage.from(MATERIAL_BUCKET).upload(path, file, {
       cacheControl: "3600",
