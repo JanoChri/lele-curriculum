@@ -385,19 +385,14 @@ function MaterialUpload({ module, onModuleRefresh }) {
     if (!file) return;
 
     if (!supabase) {
-      setUploadStatus("Upload braucht Supabase. Prüfe URL und Publishable Key in Netlify.");
+      setUploadStatus("Upload braucht Supabase. Prüfe URL und Key in Netlify.");
       return;
     }
 
     setUploadStatus("Datei wird hochgeladen …");
-    const safeName = file.name
-      .normalize("NFD")
-      .replace(/[̀-ͯ]/g, "")
-      .replace(/[^a-zA-Z0-9._-]/g, "_")
-      .replace(/_+/g, "_")
-      .replace(/^\.+/, "")
-      .slice(0, 120);
-    const path = `${module.id}-${Date.now()}-${safeName || "material"}`;
+
+    const ext = file.name.split(".").pop()?.toLowerCase().replace(/[^a-z0-9]/g, "") || "bin";
+    const path = `${module.id}/${Date.now()}.${ext}`;
 
     const { error: uploadError } = await supabase.storage.from(MATERIAL_BUCKET).upload(path, file, {
       cacheControl: "3600",
@@ -430,12 +425,12 @@ function MaterialUpload({ module, onModuleRefresh }) {
     const { error: dbError } = await supabase.from("modules").upsert(toDbModule(updatedModule), { onConflict: "id" });
     if (dbError) {
       console.error(dbError);
-      setUploadStatus("Datei hochgeladen, aber Baustein-Verknüpfung konnte nicht gespeichert werden.");
+      setUploadStatus("Datei hochgeladen, aber Verknüpfung konnte nicht gespeichert werden.");
       return;
     }
 
     onModuleRefresh(updatedModule);
-    setUploadStatus("Datei gespeichert.");
+    setUploadStatus("Datei gespeichert ✓");
     event.target.value = "";
   };
 
