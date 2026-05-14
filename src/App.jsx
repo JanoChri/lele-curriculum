@@ -400,7 +400,7 @@ function MaterialUpload({ module, onModuleRefresh }) {
 
     if (uploadError) {
       console.error(uploadError);
-      setUploadStatus("Upload fehlgeschlagen. Bucket/Policies prüfen.");
+      setUploadStatus(`Upload fehlgeschlagen: ${uploadError.message}`);
       return;
     }
 
